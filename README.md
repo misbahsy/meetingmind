@@ -40,20 +40,22 @@ MeetingMind is an AI-powered meeting assistant that helps you capture, analyze, 
    yarn install
    ```
 
-3. Create a `.env.local` file in the root directory and add the LangFlow URL:
+3. Run Langflow backend and upload the flow provided in the repo in the folder at utils/langflow_flow/Meeting Mind.json
+
+4. Create a `.env.local` file in the root directory and add the LangFlow URL:
    ```
    LANGFLOW_FLOW_URL="http://127.0.0.1:7860/api/v1/run/5781a690-e689-4b26-b636-45da76a91915"
    ```
    Replace the URL with your actual LangFlow server URL if different.
 
-4. Run the development server:
+5. Run the development server:
    ```bash
    npm run dev
    # or
    yarn dev
    ```
 
-5. Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+6. Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
 ## Usage
 
@@ -73,6 +75,7 @@ MeetingMind is an AI-powered meeting assistant that helps you capture, analyze, 
 
 ## Technologies Used
 
+- Langflow
 - Next.js
 - React
 - Tailwind CSS
