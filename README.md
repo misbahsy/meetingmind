@@ -100,7 +100,7 @@ Ensure your compressed audio maintains sufficient quality for accurate transcrip
 ## Screenshots
 
 ### Landing Page
-![Landing Page](public/landing-page.webp)
+![Landing Page](public/landing.webp)
 
 ### Dashboard
 ![Dashboard](public/dashboard.webp)
