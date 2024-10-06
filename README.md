@@ -100,10 +100,10 @@ Ensure your compressed audio maintains sufficient quality for accurate transcrip
 ## Screenshots
 
 ### Landing Page
-![Landing Page](public/landing-page.png)
+![Landing Page](public/landing-page.webp)
 
 ### Dashboard
-![Dashboard](public/dashboard.png)
+![Dashboard](public/dashboard.webp)
 
 These screenshots provide a visual representation of the application's main interfaces. The landing page showcases the initial user experience, while the dashboard displays the core functionality where users can upload audio files and view the AI-processed meeting information.
 
