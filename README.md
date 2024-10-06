@@ -23,7 +23,20 @@ MeetingMind is an AI-powered meeting assistant that helps you capture, analyze, 
 
 - Node.js 14.x or later
 - npm or yarn
-- A LangFlow server running locally or remotely
+- A LangFlow server running locally
+
+
+### Caution
+
+⚠️ **Important:** Groq Whisper used for transcription and analysis, currently supports files up to 25 MB only. If your audio file is larger than 25 MB, you will need to compress it before uploading. This limitation may affect the processing of longer meetings or high-quality audio recordings.
+
+To compress your audio files, you can use tools like:
+- Online audio compressors 
+- FFmpeg (command-line tool for audio/video processing)
+
+Ensure your compressed audio maintains sufficient quality for accurate transcription while staying under the 25 MB limit.
+
+
 
 ### Installation
 
@@ -82,6 +95,18 @@ MeetingMind is an AI-powered meeting assistant that helps you capture, analyze, 
 - Framer Motion
 - Axios
 - React-Mic
+
+
+## Screenshots
+
+### Landing Page
+![Landing Page](public/landing-page.png)
+
+### Dashboard
+![Dashboard](public/dashboard.png)
+
+These screenshots provide a visual representation of the application's main interfaces. The landing page showcases the initial user experience, while the dashboard displays the core functionality where users can upload audio files and view the AI-processed meeting information.
+
 
 ## Contributing
 
