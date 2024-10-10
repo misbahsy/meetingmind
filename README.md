@@ -28,7 +28,7 @@ MeetingMind is an AI-powered meeting assistant that helps you capture, analyze, 
 
 ### Caution
 
-⚠️ **Important:** Groq Whisper used for transcription and analysis, currently supports files up to 25 MB only. If your audio file is larger than 25 MB, you will need to compress it before uploading. This limitation may affect the processing of longer meetings or high-quality audio recordings.
+⚠️ **Important:** Groq Whisper used for transcription and analysis, currently supports files up to 25 MB only. There is a compression step in the process to reduce the file size to a manageable level. If your audio file is still larger than 25 MB, you will need to compress it before uploading. This limitation may affect the processing of longer meetings or high-quality audio recordings.
 
 To compress your audio files, you can use tools like:
 - Online audio compressors 
