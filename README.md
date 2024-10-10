@@ -1,6 +1,8 @@
-# Meeting Mind
+# Meeting Mind- An Hour Long Meeting Analyzed in under 30 seconds (Powered by Langflow)
 
-MeetingMind is an AI-powered meeting assistant that helps you capture, analyze, and act on your meeting insights effortlessly. This project is built with Next.js and uses advanced AI technologies to transform your meetings.
+MeetingMind is an AI-powered meeting assistant that helps you capture, analyze, and act on your meeting insights effortlessly. This project is built with Langflow, Next.js and Groq-based fast transcription service to analyze your meetings and generate insights.
+
+
 
 ## Features
 
@@ -30,7 +32,7 @@ MeetingMind is an AI-powered meeting assistant that helps you capture, analyze, 
 
 ⚠️ **Important:** Groq Whisper used for transcription and analysis, currently supports files up to 25 MB only. There is a compression step in the process to reduce the file size to a manageable level. If your audio file is still larger than 25 MB, you will need to compress it before uploading. This limitation may affect the processing of longer meetings or high-quality audio recordings.
 
-To compress your audio files, you can use tools like:
+To compress your audio files further, you can use tools like:
 - Online audio compressors 
 - FFmpeg (command-line tool for audio/video processing)
 
