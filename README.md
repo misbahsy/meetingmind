@@ -1,4 +1,4 @@
-# Meeting Mind- An Hour Long Meeting Analyzed in under 30 seconds (Powered by Langflow)
+# Meeting Mind- An Hour Long Meeting Analyzed in Under 30 Seconds (Powered by Langflow)
 
 MeetingMind is an AI-powered meeting assistant that helps you capture, analyze, and act on your meeting insights effortlessly. This project is built with Langflow, Next.js and Groq-based fast transcription service to analyze your meetings and generate insights.
 
