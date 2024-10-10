@@ -7,7 +7,7 @@ MeetingMind is an AI-powered meeting assistant that helps you capture, analyze, 
 
 Check out this demo video to see MeetingMind in action:
 
-[![Meeting Summary](https://github.com/misbahsy/meetingmind/raw/main/utils/demo/MeetingMind.mp4)](https://github.com/misbahsy/meetingmind/blob/main/utils/demo/MeetingMind.mp4)
+https://github.com/misbahsy/meetingmind/blob/main/utils/demo/MeetingMind.mp4
 
 
 ## Features
