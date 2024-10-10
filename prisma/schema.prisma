@@ -1,0 +1,131 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Meeting {
+  id            String      @id @default(uuid())
+  name          String
+  description   String
+  rawTranscript String
+  summary       String
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  tasks         Task[]
+  decisions     Decision[]
+  questions     Question[]
+  insights      Insight[]
+  deadlines     Deadline[]
+  attendees     Attendee[]
+  followUps     FollowUp[]
+  risks         Risk[]
+  agenda        AgendaItem[]
+}
+
+model Task {
+  id          String   @id @default(uuid())
+  task        String
+  owner       String
+  dueDate     DateTime?
+  meetingId   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  meeting     Meeting  @relation(fields: [meetingId], references: [id])
+}
+
+model Decision {
+  id          String   @id @default(uuid())
+  decision    String
+  date        DateTime
+  meetingId   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  meeting     Meeting  @relation(fields: [meetingId], references: [id])
+}
+
+model Question {
+  id          String   @id @default(uuid())
+  question    String
+  status      String
+  answer      String?
+  meetingId   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  meeting     Meeting  @relation(fields: [meetingId], references: [id])
+}
+
+model Insight {
+  id          String   @id @default(uuid())
+  insight     String
+  reference   String
+  meetingId   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  meeting     Meeting  @relation(fields: [meetingId], references: [id])
+}
+
+model Deadline {
+  id          String   @id @default(uuid())
+  description String
+  dueDate     DateTime?
+  meetingId   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  meeting     Meeting  @relation(fields: [meetingId], references: [id])
+}
+
+model Attendee {
+  id          String   @id @default(uuid())
+  name        String
+  role        String
+  meetingId   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  meeting     Meeting  @relation(fields: [meetingId], references: [id])
+}
+
+model FollowUp {
+  id          String   @id @default(uuid())
+  description String
+  owner       String
+  meetingId   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  meeting     Meeting  @relation(fields: [meetingId], references: [id])
+}
+
+model Risk {
+  id          String   @id @default(uuid())
+  risk        String
+  impact      String
+  meetingId   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  meeting     Meeting  @relation(fields: [meetingId], references: [id])
+}
+
+model AgendaItem {
+  id          String   @id @default(uuid())
+  item        String
+  meetingId   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  meeting     Meeting  @relation(fields: [meetingId], references: [id])
+}

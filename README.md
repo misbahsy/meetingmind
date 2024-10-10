@@ -1,4 +1,4 @@
-# MeetingMind
+# Meeting Mind
 
 MeetingMind is an AI-powered meeting assistant that helps you capture, analyze, and act on your meeting insights effortlessly. This project is built with Next.js and uses advanced AI technologies to transform your meetings.
 
@@ -24,7 +24,7 @@ MeetingMind is an AI-powered meeting assistant that helps you capture, analyze, 
 - Node.js 14.x or later
 - npm or yarn
 - A LangFlow server running locally
-
+- Git (for cloning the repository)
 
 ### Caution
 
@@ -35,8 +35,6 @@ To compress your audio files, you can use tools like:
 - FFmpeg (command-line tool for audio/video processing)
 
 Ensure your compressed audio maintains sufficient quality for accurate transcription while staying under the 25 MB limit.
-
-
 
 ### Installation
 
@@ -53,7 +51,10 @@ Ensure your compressed audio maintains sufficient quality for accurate transcrip
    yarn install
    ```
 
-3. Run Langflow backend and upload the flow provided in the repo in the folder at utils/langflow_flow/Meeting Mind.json
+3. Set up LangFlow:
+   - Install and run the LangFlow backend server
+   - Upload the flow provided in the repo at `utils/langflow_flow/Meeting Mind.json`
+   - Note the URL of your LangFlow server
 
 4. Create a `.env.local` file in the root directory and add the LangFlow URL:
    ```
@@ -61,14 +62,43 @@ Ensure your compressed audio maintains sufficient quality for accurate transcrip
    ```
    Replace the URL with your actual LangFlow server URL if different.
 
-5. Run the development server:
+5. Set up the database:
+
+   This project uses Prisma as an ORM. By default, it's configured to use SQLite as the database.
+
+   a. To use the local SQLite database:
+      - Ensure your `.env` file contains:
+        ```
+        DATABASE_URL="file:./dev.db"
+        ```
+      - Run the following commands to set up your database:
+        ```bash
+        npx prisma generate
+        npx prisma migrate dev --name init
+        ```
+
+   b. To use a different database (e.g., PostgreSQL with Neon):
+      - Update your `.env` file with the appropriate connection string:
+        ```
+        DATABASE_URL="postgresql://username:password@host:port/database?schema=public"
+        ```
+      - Update the `provider` in `prisma/schema.prisma`:
+        ```prisma
+        datasource db {
+          provider = "postgresql"
+          url      = env("DATABASE_URL")
+        }
+        ```
+      - Run the Prisma commands as mentioned above to generate the client and run migrations.
+
+6. Run the development server:
    ```bash
    npm run dev
    # or
    yarn dev
    ```
 
-6. Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+7. Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
 ## Usage
 
@@ -85,17 +115,42 @@ Ensure your compressed audio maintains sufficient quality for accurate transcrip
   - `dashboard/`: Dashboard page component
   - `page.tsx`: Home page component
 - `public/`: Static assets
+- `prisma/`: Database schema and migrations
+- `utils/`: Utility functions and configurations
+- `lib/`: Shared libraries and modules
 
 ## Technologies Used
 
-- Langflow
-- Next.js
-- React
-- Tailwind CSS
-- Framer Motion
-- Axios
-- React-Mic
+- Langflow: For AI workflow management
+- Next.js: React framework for building the web application
+- React: JavaScript library for building user interfaces
+- Tailwind CSS: Utility-first CSS framework
+- Framer Motion: Animation library for React
+- Axios: Promise-based HTTP client
+- Prisma: ORM for database management
+- SQLite: Default database (can be changed to PostgreSQL or others)
+- Groq: AI model provider for transcription and analysis
 
+## Configuration
+
+- The project uses environment variables for configuration. Ensure all necessary variables are set in your `.env.local` file.
+- Tailwind CSS configuration can be found in `tailwind.config.ts`.
+- TypeScript configuration is in `tsconfig.json`.
+
+## API Routes
+
+- `/api/meetings`: Handles CRUD operations for meetings
+- `/api/transcribe`: Handles audio file transcription and analysis
+
+## Debugging
+
+- Use the browser's developer tools to debug client-side issues.
+- For server-side debugging, use console.log statements or attach a debugger to your Node.js process.
+
+## Performance Considerations
+
+- Large audio files may take longer to process. Consider implementing a progress indicator for better user experience.
+- Optimize database queries and indexes for improved performance as the number of meetings grows.
 
 ## Screenshots
 
@@ -103,15 +158,36 @@ Ensure your compressed audio maintains sufficient quality for accurate transcrip
 ![Landing Page](public/landing.webp)
 
 ### Dashboard
-![Dashboard](public/dashboard.webp)
+![Dashboard](public/dashboard.png)
+
+#### Meeting Summary
+![Meeting Summary](public/meeting_summary.png)
+
+#### Meeting Details
+![Meeting Details](public/meeting_details.png)
 
 These screenshots provide a visual representation of the application's main interfaces. The landing page showcases the initial user experience, while the dashboard displays the core functionality where users can upload audio files and view the AI-processed meeting information.
 
-
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Contributions are welcome! Please feel free to submit a Pull Request. Here are some ways you can contribute:
+
+- Report bugs and issues
+- Suggest new features
+- Improve documentation
+- Submit pull requests with bug fixes or new features
+
+Please read our contributing guidelines before submitting a pull request.
 
 ## License
 
-This project is licensed under the MIT License.
+This project is licensed under the MIT License. See the LICENSE file for details.
+
+## Support
+
+If you encounter any problems or have questions, please open an issue on the GitHub repository.
+
+## Acknowledgements
+
+- Thanks to the Langflow team for providing the AI workflow management tool.
+- Special thanks to all contributors who have helped shape this project.
