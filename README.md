@@ -62,6 +62,22 @@ Ensure your compressed audio maintains sufficient quality for accurate transcrip
    ```
    Replace the URL with your actual LangFlow server URL if different.
 
+   In the file `app/api/transcribe/route.ts`, locate the `payload` object and update the Groq component name to match your LangFlow component name. For example:
+
+   ```typescript
+   const payload = {
+     output_type: 'text',
+     input_type: 'text',
+     tweaks: {
+       'YourGroqComponentName': {
+         audio_file: filePath
+       },         
+     }
+   }
+   ```
+
+   Replace 'YourGroqComponentName' with the actual name of your Groq component in LangFlow.
+
 5. Set up the database:
 
    This project uses Prisma as an ORM. By default, it's configured to use SQLite as the database.

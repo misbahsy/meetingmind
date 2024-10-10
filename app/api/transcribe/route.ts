@@ -53,12 +53,7 @@ export const POST = async (request: NextRequest) => {
       tweaks: {
         'GroqWhisperComponent-Lep46': {
           audio_file: filePath // Use the full path of the saved file
-        },
-        'TextInput-5MmdW': {},
-        'OpenAIModel-iM892': {},
-        'JSONCleaner-dSEIi': {},
-        'TextOutput-By44u': {},
-        'TextOutput-V5ldV': {}                 
+        },         
       }
     }
 

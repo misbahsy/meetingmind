@@ -151,7 +151,7 @@ const UploadAudio: React.FC<{ onUploadSuccess: () => void }> = ({ onUploadSucces
           {isTranscribeDisabled && (
             <p className="text-red-500">
               {selectedFile && getFileSizeMB(compressedFile || selectedFile) > 24
-                ? 'File size exceeds 24 MB even after compression.'
+                ? 'File size exceeds 24 MB, please compress the file before transcribing.'
                 : ''}
             </p>
           )}
