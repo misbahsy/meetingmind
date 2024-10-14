@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import dynamic from 'next/dynamic';
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -13,20 +14,21 @@ import {
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { Card, CardHeader, CardTitle, CardContent, CardFooter, CardDescription } from "@/components/ui/card";
-import UploadAudio from '@/components/UploadAudio';
 import { useToast } from "@/hooks/use-toast"
 
+const UploadAudio = dynamic(() => import('@/components/UploadAudio'), { ssr: false });
+const AudioRecorder = dynamic(() => import('@/components/AudioRecorder'), { ssr: false });
 
 interface Meeting {
   id: string;
   name: string;
   description: string;
-  fileName: string;
 }
 
 const Dashboard: React.FC = () => {
   const router = useRouter();
   const [meetings, setMeetings] = useState<Meeting[]>([]);
+  const [currentTranscription, setCurrentTranscription] = useState<string>('');
   const { toast } = useToast();
 
   const fetchMeetings = async () => {
@@ -49,7 +51,21 @@ const Dashboard: React.FC = () => {
   }, []);
 
   const handleViewDetails = (meetingId: string) => {
-    router.push(`dashboard/meeting/${meetingId}`);
+    router.push(`/dashboard/meeting/${meetingId}`);
+  };
+
+  const handleTranscriptionUpdate = (transcription: string) => {
+    setCurrentTranscription(prev => prev + transcription);
+  };
+
+  const handleRecordingComplete = (meetingId: string) => {
+    fetchMeetings();
+    setCurrentTranscription('');
+    toast({
+      title: 'Recording Complete',
+      description: `Meeting ID: ${meetingId}`,
+    });
+    router.push(`/dashboard/meeting/${meetingId}`);
   };
 
   return (
@@ -58,7 +74,24 @@ const Dashboard: React.FC = () => {
         <h1 className="text-2xl font-semibold">Meeting Mind</h1>
       </header>
       <main className="container mx-auto p-6 space-y-6">
-        <UploadAudio onUploadSuccess={fetchMeetings} />
+        <Card>
+          <CardHeader>
+            <CardTitle>Record or Upload Audio</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <AudioRecorder 
+              onTranscriptionUpdate={handleTranscriptionUpdate}
+              onRecordingComplete={handleRecordingComplete}
+            />
+            <UploadAudio onUploadSuccess={fetchMeetings} />
+            {currentTranscription && (
+              <div>
+                <h3 className="font-semibold">Current Transcription:</h3>
+                <p>{currentTranscription}</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
         <Card>
           <CardHeader>
             <CardTitle>Previous Meetings</CardTitle>

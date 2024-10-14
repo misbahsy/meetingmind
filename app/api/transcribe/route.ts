@@ -10,10 +10,10 @@ export const POST = async (request: NextRequest) => {
     console.log('Received POST request to /api/transcribe')
     const formData = await request.formData()
     const file = formData.get('audio') as File
-    const fullPath = formData.get('fullPath') as string
+    const meetingId = formData.get('meetingId') as string | null
 
     console.log('Received file:', file?.name)
-    console.log('Full path:', fullPath)
+    console.log('Meeting ID:', meetingId)
 
     if (!file) {
       console.error('No audio file provided')
@@ -52,7 +52,7 @@ export const POST = async (request: NextRequest) => {
       input_type: 'text',
       tweaks: {
         'GroqWhisperComponent-Lep46': {
-          audio_file: filePath // Use the full path of the saved file
+          audio_file: filePath
         },         
       }
     }
@@ -80,6 +80,7 @@ export const POST = async (request: NextRequest) => {
     if (!analyzedTranscript || !rawTranscript) {
       throw new Error('Invalid API response structure.')
     }
+
     console.log('Analyzed transcript:', analyzedTranscript.substring(0, 100) + '...')
     console.log('Raw transcript:', rawTranscript.substring(0, 100) + '...')
 
@@ -101,103 +102,200 @@ export const POST = async (request: NextRequest) => {
       return !isNaN(parsedDate.getTime()) ? parsedDate.toISOString() : null
     }
 
-    // Save to database with safe access
-    const meeting = await prisma.meeting.create({
-      data: {
-        name: analyzedData['Meeting Name'] || 'Untitled Meeting',
-        description: analyzedData['Description'] || 'No description provided.',
-        rawTranscript: rawData,
-        summary: analyzedData['Summary'] || '',
-        tasks: {
-          create: (analyzedData['Tasks'] || [])
-            .filter((task: any) => task && typeof task === 'object')
-            .map((task: any) => ({
-              task: task.description || 'No task description',
-              owner: task.owner || 'Unassigned',
-              dueDate: task.due_date ? formatDate(task.due_date) : null,
-            })),
+    let meeting;
+
+    if (meetingId) {
+      // Update existing meeting
+      meeting = await prisma.meeting.update({
+        where: { id: meetingId },
+        data: {
+          rawTranscript: { append: rawData },
+          summary: analyzedData['Summary'] || '',
+          tasks: {
+            create: (analyzedData['Tasks'] || [])
+              .filter((task: any) => task && typeof task === 'object')
+              .map((task: any) => ({
+                task: task.description || 'No task description',
+                owner: task.owner || 'Unassigned',
+                dueDate: task.due_date ? formatDate(task.due_date) : null,
+              })),
+          },
+          decisions: {
+            create: (analyzedData['Decisions'] || [])
+              .filter((decision: any) => decision && typeof decision === 'object')
+              .map((decision: any) => ({
+                decision: decision.description || 'No decision description',
+                date: decision.date ? formatDate(decision.date) : new Date().toISOString(),
+              })),
+          },
+          questions: {
+            create: (analyzedData['Questions'] || [])
+              .filter((question: any) => question && typeof question === 'object')
+              .map((question: any) => ({
+                question: question.question || 'No question',
+                status: question.status || 'Unanswered',
+                answer: question.answer || '',
+              })),
+          },
+          insights: {
+            create: (analyzedData['Insights'] || [])
+              .filter((insight: any) => insight && typeof insight === 'object')
+              .map((insight: any) => ({
+                insight: insight.insight || 'No insight',
+                reference: insight.reference || '',
+              })),
+          },
+          deadlines: {
+            create: (analyzedData['Deadlines'] || [])
+              .filter((deadline: any) => deadline && typeof deadline === 'object')
+              .map((deadline: any) => ({
+                description: deadline.description || 'No deadline description',
+                dueDate: deadline.date ? formatDate(deadline.date) : null,
+              })),
+          },
+          attendees: {
+            create: (analyzedData['Attendees'] || [])
+              .filter((attendee: any) => attendee && typeof attendee === 'object')
+              .map((attendee: any) => ({
+                name: attendee.name || 'Unnamed Attendee',
+                role: attendee.role || 'No role specified',
+              })),
+          },
+          followUps: {
+            create: (analyzedData['Follow-ups'] || [])
+              .filter((followUp: any) => followUp && typeof followUp === 'object')
+              .map((followUp: any) => ({
+                description: followUp.description || 'No follow-up description',
+                owner: followUp.owner || 'Unassigned',
+              })),
+          },
+          risks: {
+            create: (analyzedData['Risks'] || [])
+              .filter((risk: any) => risk && typeof risk === 'object')
+              .map((risk: any) => ({
+                risk: risk.risk || 'No risk description',
+                impact: risk.impact || 'No impact specified',
+              })),
+          },
+          agenda: {
+            create: (analyzedData['Agenda'] || [])
+              .filter((item: any) => item && typeof item === 'string')
+              .map((item: string) => ({
+                item: item,
+              })),
+          },
         },
-        decisions: {
-          create: (analyzedData['Decisions'] || [])
-            .filter((decision: any) => decision && typeof decision === 'object')
-            .map((decision: any) => ({
-              decision: decision.description || 'No decision description',
-              date: decision.date ? formatDate(decision.date) : new Date().toISOString(),
-            })),
+        include: {
+          tasks: true,
+          decisions: true,
+          questions: true,
+          insights: true,
+          deadlines: true,
+          attendees: true,
+          followUps: true,
+          risks: true,
+          agenda: true,
         },
-        questions: {
-          create: (analyzedData['Questions'] || [])
-            .filter((question: any) => question && typeof question === 'object')
-            .map((question: any) => ({
-              question: question.question || 'No question',
-              status: question.status || 'Unanswered',
-              answer: question.answer || '',
-            })),
+      })
+    } else {
+      // Create new meeting
+      meeting = await prisma.meeting.create({
+        data: {
+          name: analyzedData['Meeting Name'] || 'Untitled Meeting',
+          description: analyzedData['Description'] || 'No description provided.',
+          rawTranscript: rawData,
+          summary: analyzedData['Summary'] || '',
+          tasks: {
+            create: (analyzedData['Tasks'] || [])
+              .filter((task: any) => task && typeof task === 'object')
+              .map((task: any) => ({
+                task: task.description || 'No task description',
+                owner: task.owner || 'Unassigned',
+                dueDate: task.due_date ? formatDate(task.due_date) : null,
+              })),
+          },
+          decisions: {
+            create: (analyzedData['Decisions'] || [])
+              .filter((decision: any) => decision && typeof decision === 'object')
+              .map((decision: any) => ({
+                decision: decision.description || 'No decision description',
+                date: decision.date ? formatDate(decision.date) : new Date().toISOString(),
+              })),
+          },
+          questions: {
+            create: (analyzedData['Questions'] || [])
+              .filter((question: any) => question && typeof question === 'object')
+              .map((question: any) => ({
+                question: question.question || 'No question',
+                status: question.status || 'Unanswered',
+                answer: question.answer || '',
+              })),
+          },
+          insights: {
+            create: (analyzedData['Insights'] || [])
+              .filter((insight: any) => insight && typeof insight === 'object')
+              .map((insight: any) => ({
+                insight: insight.insight || 'No insight',
+                reference: insight.reference || '',
+              })),
+          },
+          deadlines: {
+            create: (analyzedData['Deadlines'] || [])
+              .filter((deadline: any) => deadline && typeof deadline === 'object')
+              .map((deadline: any) => ({
+                description: deadline.description || 'No deadline description',
+                dueDate: deadline.date ? formatDate(deadline.date) : null,
+              })),
+          },
+          attendees: {
+            create: (analyzedData['Attendees'] || [])
+              .filter((attendee: any) => attendee && typeof attendee === 'object')
+              .map((attendee: any) => ({
+                name: attendee.name || 'Unnamed Attendee',
+                role: attendee.role || 'No role specified',
+              })),
+          },
+          followUps: {
+            create: (analyzedData['Follow-ups'] || [])
+              .filter((followUp: any) => followUp && typeof followUp === 'object')
+              .map((followUp: any) => ({
+                description: followUp.description || 'No follow-up description',
+                owner: followUp.owner || 'Unassigned',
+              })),
+          },
+          risks: {
+            create: (analyzedData['Risks'] || [])
+              .filter((risk: any) => risk && typeof risk === 'object')
+              .map((risk: any) => ({
+                risk: risk.risk || 'No risk description',
+                impact: risk.impact || 'No impact specified',
+              })),
+          },
+          agenda: {
+            create: (analyzedData['Agenda'] || [])
+              .filter((item: any) => item && typeof item === 'string')
+              .map((item: string) => ({
+                item: item,
+              })),
+          },
         },
-        insights: {
-          create: (analyzedData['Insights'] || [])
-            .filter((insight: any) => insight && typeof insight === 'object')
-            .map((insight: any) => ({
-              insight: insight.insight || 'No insight',
-              reference: insight.reference || '',
-            })),
+        include: {
+          tasks: true,
+          decisions: true,
+          questions: true,
+          insights: true,
+          deadlines: true,
+          attendees: true,
+          followUps: true,
+          risks: true,
+          agenda: true,
         },
-        deadlines: {
-          create: (analyzedData['Deadlines'] || [])
-            .filter((deadline: any) => deadline && typeof deadline === 'object')
-            .map((deadline: any) => ({
-              description: deadline.description || 'No deadline description',
-              dueDate: deadline.date ? formatDate(deadline.date) : null,
-            })),
-        },
-        attendees: {
-          create: (analyzedData['Attendees'] || [])
-            .filter((attendee: any) => attendee && typeof attendee === 'object')
-            .map((attendee: any) => ({
-              name: attendee.name || 'Unnamed Attendee',
-              role: attendee.role || 'No role specified',
-            })),
-        },
-        followUps: {
-          create: (analyzedData['Follow-ups'] || [])
-            .filter((followUp: any) => followUp && typeof followUp === 'object')
-            .map((followUp: any) => ({
-              description: followUp.description || 'No follow-up description',
-              owner: followUp.owner || 'Unassigned',
-            })),
-        },
-        risks: {
-          create: (analyzedData['Risks'] || [])
-            .filter((risk: any) => risk && typeof risk === 'object')
-            .map((risk: any) => ({
-              risk: risk.risk || 'No risk description',
-              impact: risk.impact || 'No impact specified',
-            })),
-        },
-        agenda: {
-          create: (analyzedData['Agenda'] || [])
-            .filter((item: any) => item && typeof item === 'string')
-            .map((item: string) => ({
-              item: item,
-            })),
-        },
-      },
-      include: {
-        tasks: true,
-        decisions: true,
-        questions: true,
-        insights: true,
-        deadlines: true,
-        attendees: true,
-        followUps: true,
-        risks: true,
-        agenda: true,
-      },
-    })
+      })
+    }
 
     console.log('Meeting saved successfully:', meeting.id)
 
-    return NextResponse.json(meeting, { status: 200 })
+    return NextResponse.json({ meetingId: meeting.id, transcription: rawData }, { status: 200 })
   } catch (error: any) {
     console.error('Error in /api/transcribe:', error)
     return NextResponse.json({ error: 'An error occurred during processing.' }, { status: 500 })
