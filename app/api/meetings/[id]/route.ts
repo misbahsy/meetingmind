@@ -110,3 +110,31 @@ export const GET = async (request: NextRequest, { params }: { params: { id: stri
     return NextResponse.json({ error: 'Failed to fetch meeting details.' }, { status: 500 })
   }
 }
+
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  const { id } = params
+
+  try {
+    // Delete all associated records
+    await prisma.$transaction([
+      prisma.task.deleteMany({ where: { meetingId: id } }),
+      prisma.decision.deleteMany({ where: { meetingId: id } }),
+      prisma.question.deleteMany({ where: { meetingId: id } }),
+      prisma.insight.deleteMany({ where: { meetingId: id } }),
+      prisma.deadline.deleteMany({ where: { meetingId: id } }),
+      prisma.attendee.deleteMany({ where: { meetingId: id } }),
+      prisma.followUp.deleteMany({ where: { meetingId: id } }),
+      prisma.risk.deleteMany({ where: { meetingId: id } }),
+      prisma.agendaItem.deleteMany({ where: { meetingId: id } }),
+      prisma.meeting.delete({ where: { id } }),
+    ])
+
+    return NextResponse.json({ message: 'Meeting deleted successfully' }, { status: 200 })
+  } catch (error) {
+    console.error('Error deleting meeting:', error)
+    return NextResponse.json({ error: 'Failed to delete meeting' }, { status: 500 })
+  }
+}

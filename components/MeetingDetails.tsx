@@ -15,8 +15,11 @@ import {
   List,
   AlertTriangle,
   FileText,
+  Download,
 } from "lucide-react"
 import CategoryCard from "@/components/CategoryCard"
+import axios from "axios"
+import { useToast } from "@/hooks/use-toast"
 
 interface CategoryItem {
   [key: string]: string
@@ -24,6 +27,7 @@ interface CategoryItem {
 
 interface MeetingDetailsProps {
   data: {
+    id: string
     name: string
     description: string
     transcript: string
@@ -42,6 +46,8 @@ interface MeetingDetailsProps {
 }
 
 export default function MeetingDetails({ data }: MeetingDetailsProps) {
+  const { toast } = useToast()
+
   const categories = [
     { title: "Tasks", icon: CheckCircle, items: data.breakdown.Tasks || [], gridSpan: "col-span-2" },
     { title: "Decisions", icon: Flag, items: data.breakdown.Decisions || [], gridSpan: "col-span-2" },
@@ -53,9 +59,47 @@ export default function MeetingDetails({ data }: MeetingDetailsProps) {
     { title: "Risks", icon: AlertTriangle, items: data.breakdown.Risks || [], gridSpan: "col-span-2" },
   ]
 
+  const handleExport = async () => {
+    try {
+      const response = await axios.get(`/api/meetings/${data.id}/export`, {
+        responseType: 'blob',
+      })
+
+      if (response.status === 200) {
+        const url = window.URL.createObjectURL(new Blob([response.data]))
+        const link = document.createElement('a')
+        link.href = url
+        link.setAttribute('download', `${data.name.replace(/\s+/g, '_')}_Details.docx`)
+        document.body.appendChild(link)
+        link.click()
+        link.parentNode?.removeChild(link)
+        toast({
+          title: "Success",
+          description: "Meeting details exported successfully!",
+        })
+      }
+    } catch (error: any) {
+      console.error(error)
+      toast({
+        title: "Error",
+        description: "Failed to export meeting details.",
+        variant: "destructive",
+      })
+    }
+  }
+
   return (
     <div className="container mx-auto p-6 bg-background">
-      <h1 className="text-3xl font-bold mb-2">{data.name}</h1>
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-3xl font-bold">{data.name}</h1>
+        <button
+          onClick={handleExport}
+          className="flex items-center px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+        >
+          <Download className="w-5 h-5 mr-2" />
+          Export as DOCX
+        </button>
+      </div>
       <p className="text-muted-foreground mb-6">{data.description}</p>
       <Tabs defaultValue="summary" className="space-y-4">
         <TabsList>

@@ -52,6 +52,25 @@ const Dashboard: React.FC = () => {
     router.push(`dashboard/meeting/${meetingId}`);
   };
 
+  const handleDelete = async (meetingId: string) => {
+    if (confirm("Are you sure you want to delete this meeting? This action cannot be undone.")) {
+      try {
+        await axios.delete(`/api/meetings/${meetingId}`);
+        toast({
+          title: 'Success',
+          description: 'Meeting deleted successfully.',
+        });
+        fetchMeetings(); // Refresh the meetings list
+      } catch (error) {
+        console.error("Error deleting meeting:", error);
+        toast({
+          title: 'Error',
+          description: 'Failed to delete meeting.',
+          variant: 'destructive',
+        });
+      }
+    }
+  };
   return (
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background px-6">
@@ -80,9 +99,22 @@ const Dashboard: React.FC = () => {
                       <TableCell>{meeting.name}</TableCell>
                       <TableCell>{meeting.description}</TableCell>
                       <TableCell>
-                        <Button variant="outline" onClick={() => handleViewDetails(meeting.id)}>
-                          View Details
-                        </Button>
+                        <div className="flex space-x-2">
+                          <Button 
+                            variant="outline" 
+                            onClick={() => handleViewDetails(meeting.id)}
+                            className="px-4 py-2 text-sm"
+                          >
+                            View Details
+                          </Button>
+                          <Button 
+                            variant="destructive" 
+                            onClick={() => handleDelete(meeting.id)}
+                            className="px-4 py-2 text-sm"
+                          >
+                            Delete
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}

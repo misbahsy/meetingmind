@@ -6,6 +6,7 @@ import axios from "axios";
 import MeetingDetails from "@/components/MeetingDetails";
 
 interface MeetingData {
+  id: string;
   name: string;
   description: string;
   transcript: string;
@@ -38,7 +39,7 @@ export default function MeetingPage() {
         .get(`/api/meetings/${meetingId}`)
         .then((response) => {
           console.log("Received meeting data:", response.data);
-          setData(response.data);
+          setData({ ...response.data, id: meetingId });
         })
         .catch((error) => {
           console.error("Error fetching meeting details:", error);

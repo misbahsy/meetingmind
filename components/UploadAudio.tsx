@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,18 +11,62 @@ import { fetchFile } from '@ffmpeg/util';
 
 const ffmpeg = new FFmpeg();
 
+interface MonitoredFile {
+  name: string;
+  size: number;
+  lastModified: string;
+}
+
 const UploadAudio: React.FC<{ onUploadSuccess: () => void }> = ({ onUploadSuccess }) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isCompressing, setIsCompressing] = useState(false);
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [compressedFile, setCompressedFile] = useState<File | null>(null);
+  const [monitoredFiles, setMonitoredFiles] = useState<MonitoredFile[]>([]);
   const { toast } = useToast();
+
+  useEffect(() => {
+    fetchMonitoredFiles();
+    const interval = setInterval(fetchMonitoredFiles, 10000); // Poll every 10 seconds
+    return () => clearInterval(interval);
+  }, []);
+
+  const fetchMonitoredFiles = async () => {
+    try {
+      const response = await fetch('/api/monitored-files');
+      if (response.ok) {
+        const files: MonitoredFile[] = await response.json();
+        setMonitoredFiles(files);
+      }
+    } catch (error) {
+      console.error('Error fetching monitored files:', error);
+    }
+  };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
       setSelectedFile(file);
       setCompressedFile(null);
+    }
+  };
+
+  const handleMonitoredFileSelect = async (fileName: string) => {
+    try {
+      const response = await fetch(`/api/monitored-files/${encodeURIComponent(fileName)}`);
+      if (response.ok) {
+        const blob = await response.blob();
+        const file = new File([blob], fileName, { type: blob.type });
+        setSelectedFile(file);
+        setCompressedFile(null);
+      }
+    } catch (error) {
+      console.error('Error selecting monitored file:', error);
+      toast({
+        title: 'File Selection Failed',
+        description: 'An error occurred while selecting the file.',
+        variant: 'destructive',
+      });
     }
   };
 
@@ -136,6 +180,19 @@ const UploadAudio: React.FC<{ onUploadSuccess: () => void }> = ({ onUploadSucces
           />
           {selectedFile && (
             <p>Selected File: {selectedFile.name} ({getFileSizeMB(selectedFile).toFixed(2)} MB)</p>
+          )}
+          {monitoredFiles.length > 0 && (
+            <div>
+              <h3 className="text-lg font-semibold mb-2">Monitored Files:</h3>
+              <ul className="space-y-2">
+                {monitoredFiles.map((file) => (
+                  <li key={file.name} className="flex items-center justify-between">
+                    <span>{file.name} ({(file.size / (1024 * 1024)).toFixed(2)} MB)</span>
+                    <Button onClick={() => handleMonitoredFileSelect(file.name)}>Select</Button>
+                  </li>
+                ))}
+              </ul>
+            </div>
           )}
           {isCompressionNeeded && (
             <Button onClick={compressAudio} disabled={isCompressing}>
