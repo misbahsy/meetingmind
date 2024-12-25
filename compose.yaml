@@ -1,0 +1,36 @@
+version: '3.9'
+services:
+  database:
+    image: nouchka/sqlite3:latest
+    stdin_open: true
+    tty: true
+    volumes:
+      - sqlite-data:/root/db/
+
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: langflow
+      POSTGRES_PASSWORD: langflow
+      POSTGRES_DB: langflow
+    ports:
+      - 5432:5432
+    volumes:
+      - postgres-langflow:/var/lib/postgresql/data
+
+  langflow:
+    container_name: langflow
+    image: langflowai/langflow:latest
+    ports:
+      - 7860:7860
+    environment:
+      - LANGFLOW_DATABASE_URL=postgresql://langflow:langflow@postgres:5432/langflow
+    depends_on:
+      - database
+    volumes:
+      - langflow-data:/app/langflow
+  
+volumes:
+  sqlite-data:
+  langflow-data:
+  postgres-langflow:
