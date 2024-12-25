@@ -127,15 +127,18 @@ Ensure your compressed audio maintains sufficient quality for accurate transcrip
 
 ## Docker Setup
 Docker compose setup will run three containers of Sqlite, Langflow, Postgres. Postgres is used to store the Langflow data.
-1.
+
+1. Use the command to run the containers.
 ```bash
 docker compose up
 ```
-Use the command to run the containers.
+
 2. Langflow setup
+   
   - Upload the flow provided in the repo at `utils/langflow_flow/Meeting Mind.json`
   - Note the URL of your LangFlow server
   - Paste the url on .env.local file
+
 3. Build the application image
 ```bash
 docker build -t YOUR-IMAGE-NAME .
